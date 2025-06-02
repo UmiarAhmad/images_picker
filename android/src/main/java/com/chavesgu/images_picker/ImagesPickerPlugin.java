@@ -38,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.content.pm.PackageManager; // Для PERMISSION_GRANTED
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -58,7 +59,7 @@ import com.luck.picture.lib.listener.OnResultCallbackListener;
 import com.luck.picture.lib.tools.PictureFileUtils;
 
 /**
- * ImagesPickerPlugin тепер использует FlutterEmbedding V2 API.
+ * ImagesPickerPlugin переведён на FlutterEmbedding V2 API.
  * Убираем старый регистратор Registrar и используем FlutterPlugin + ActivityAware.
  */
 public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodCallHandler, PluginRegistry.RequestPermissionsResultListener {
@@ -77,7 +78,6 @@ public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodC
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        // Сохраняем context и регистрируем MethodChannel
         context = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_NAME);
         channel.setMethodCallHandler(this);
@@ -94,7 +94,6 @@ public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodC
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
         activity = binding.getActivity();
-        // Регистрируем слушатель результатов запросов на разрешения
         binding.addRequestPermissionsResultListener(this);
     }
 
@@ -299,8 +298,8 @@ public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodC
 
     private boolean hasPermission() {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED
-                        && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED);
+                (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
     }
 
     @Override
@@ -310,8 +309,8 @@ public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodC
         }
         if (requestCode == WRITE_IMAGE_CODE) {
             if (grantResults.length > 1
-                    && grantResults[0] == PermissionChecker.PERMISSION_GRANTED
-                    && grantResults[1] == PermissionChecker.PERMISSION_GRANTED) {
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 saveImageToGallery(WRITE_IMAGE_PATH, ALBUM_NAME, pendingResult);
             } else {
                 pendingResult.success(false);
@@ -321,8 +320,8 @@ public class ImagesPickerPlugin implements FlutterPlugin, ActivityAware, MethodC
         }
         if (requestCode == WRITE_VIDEO_CODE) {
             if (grantResults.length > 1
-                    && grantResults[0] == PermissionChecker.PERMISSION_GRANTED
-                    && grantResults[1] == PermissionChecker.PERMISSION_GRANTED) {
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 saveVideoToGallery(WRITE_VIDEO_PATH, ALBUM_NAME, pendingResult);
             } else {
                 pendingResult.success(false);
